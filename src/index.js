@@ -4,6 +4,14 @@ const ROWS = 20;
 const BLOCK_SIZE = 30;
 const PATTERN_SIZE = 5;
 
+// High score persistence
+const HIGH_SCORE_KEY = "stackOverflownHighScore";
+
+// Difficulty progression
+const INITIAL_DROP_INTERVAL = 1000;
+const MIN_DROP_INTERVAL = 200;
+const DROP_INTERVAL_DECREASE = 100;
+
 // Colors for blocks (dev-themed)
 const COLORS = {
   0: "#252526", // Empty
@@ -44,7 +52,7 @@ let patternsCleared = 0;
 let gameOver = false;
 let isPaused = false;
 let dropCounter = 0;
-let dropInterval = 1000;
+let dropInterval = INITIAL_DROP_INTERVAL;
 let lastTime = 0;
 let targetPattern = null;
 
@@ -61,7 +69,7 @@ function init() {
     .map(() => Array(COLS).fill(0));
 
   // Load high score from localStorage
-  highScore = parseInt(localStorage.getItem("stackOverflownHighScore")) || 0;
+  highScore = parseInt(localStorage.getItem(HIGH_SCORE_KEY)) || 0;
   document.getElementById("high-score").textContent = highScore;
 
   // Set initial target pattern
@@ -279,7 +287,7 @@ function checkPatternMatch() {
         patternsCleared++;
         if (patternsCleared % 5 === 0) {
           level++;
-          dropInterval = Math.max(200, 1000 - (level - 1) * 100);
+          dropInterval = Math.max(MIN_DROP_INTERVAL, INITIAL_DROP_INTERVAL - (level - 1) * DROP_INTERVAL_DECREASE);
           document.getElementById("level").textContent = level;
         }
         updateScore();
@@ -325,7 +333,7 @@ function updateScore() {
   if (score > highScore) {
     highScore = score;
     document.getElementById("high-score").textContent = highScore;
-    localStorage.setItem("stackOverflownHighScore", highScore);
+    localStorage.setItem(HIGH_SCORE_KEY, highScore);
   }
 }
 
@@ -365,7 +373,6 @@ function handleKeyPress(e) {
 // Toggle pause
 function togglePause() {
   isPaused = !isPaused;
-  document.getElementById("status").textContent = isPaused ? "Paused" : "Playing...";
 }
 
 // End game
